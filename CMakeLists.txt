@@ -18,6 +18,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_executable(ogc
     src/main.cpp
     src/callback.cpp
+    src/shader.cpp
 )
 
 add_subdirectory(external/glfw)
