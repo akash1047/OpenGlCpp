@@ -4,11 +4,22 @@
 #include <iostream>
 #include <string>
 
-class Shader {
+class Id {
+    protected:
     unsigned int id;
 
     public:
-    Shader(GLenum shader_type) { this->id = glCreateShader(shader_type); }
+    // Id() {}
+    // Id(unsigned int id_t) : id(id_t) {}
+    Id(unsigned int (*func)(void)) : id(func()) {}
+    template <typename T> Id(unsigned int (*func)(T), T arg) : id(func(arg)) {}
+
+    constexpr inline unsigned int get_id() { return this->id; }
+};
+
+class Shader: public Id {
+    public:
+    Shader(GLenum shader_type) : Id(glCreateShader, shader_type) {}
     virtual ~Shader() {
         // std::cout << "deleting shader" << std::endl;
         glDeleteShader(this->id);
@@ -42,11 +53,10 @@ class FragmentShader: public Shader {
     // }
 };
 
-class ShaderProgram {
-    unsigned int id;
-
+class ShaderProgram: public Id {
     public:
-    ShaderProgram() { this->id = glCreateProgram(); }
+    ShaderProgram() : Id(glCreateProgram) {}
+    ~ShaderProgram() { glDeleteProgram(this->id); }
 
     inline void attach_shader(Shader &&shader) {
         glAttachShader(this->id, shader.get_id());
@@ -62,4 +72,6 @@ class ShaderProgram {
     }
 
     std::string log_info();
+
+    inline void use() { glUseProgram(this->id); }
 };

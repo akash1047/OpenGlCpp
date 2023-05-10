@@ -71,47 +71,34 @@ int main() {
 
     // clang-format off
     float vertices[] = {
-        0.0f, 0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f
+        0.5f, 0.5f, 0.0f, // top right
+        0.5f, -0.5f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f, 0.5f, 0.0f, // bottom left
+    };
+
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
     };
     // clang-format on
 
-    unsigned int vbo;
-    glGenBuffers(1, &vbo);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), vertices, GL_STATIC_DRAW);
-
-    const char *vertex_shader_src =
-        "#version 330 core\n"
-        "layout (location = 0) in vec3 aPos;\n"
-        "void main()\n"
-        "{\n"
-        "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
-        "}\0";
-
-    // unsigned int vertex_shader;
-    // vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    // glShaderSource(vertex_shader, 1, &vertex_shader_src, nullptr);
-    // glCompileShader(vertex_shader);
+    /* shader */
 
     VertexShader vshader{};
-    vshader.compile(vertex_shader_src);
+    vshader.compile("#version 330 core\n"
+                    "layout (location = 0) in vec3 aPos;\n"
+                    "void main()\n"
+                    "{\n"
+                    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+                    "}\0"
+
+    );
 
     if (!vshader.compile_success()) {
         cout << "ERROR [vertex shader compilation failed]\n"
              << vshader.log_info() << endl;
     }
-
-    // int success;
-    // char info_log[512];
-    // glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
-    // if (!success) {
-    //     glGetShaderInfoLog(vertex_shader, 512, nullptr, info_log);
-    //     cout << "ERROR [vertex shader compilation failed]: " << info_log
-    //          << endl;
-    // }
 
     FragmentShader fshader{};
     fshader.compile("#version 330 core\n"
@@ -136,16 +123,48 @@ int main() {
         cout << "ERROR [shader proram link failed]\n"
              << shader_program.log_info() << endl;
     }
+    // ---------------------------------------------
 
-    // vshader.~VertexShader();
-    // fshader.~FragmentShader();
+    unsigned int vbo;
+    glGenBuffers(1, &vbo);
+
+    unsigned int vao;
+    glGenVertexArrays(1, &vao);
+
+    unsigned int ebo;
+    glGenBuffers(1, &ebo);
+
+    // bind vertex array object first
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices,
+                 GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+                          (void *)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
 
+        shader_program.use();
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &ebo);
 
     // clean up glfw
     glfwTerminate();
