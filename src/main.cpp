@@ -3,6 +3,8 @@
 #include "shader.hpp"
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "opengl/vertex_shader.hpp"
+#include "opengl/fragment_shader.hpp"
 
 using std::cout;
 using std::endl;
