@@ -1,0 +1,6 @@
+#ifndef UTIL_TEST_H
+#define UTIL_TEST_H
+
+#define DIR_SRC "@CMAKE_CURRENT_SOURCE_DIR@"
+
+#endif // UTIL_TEST_H

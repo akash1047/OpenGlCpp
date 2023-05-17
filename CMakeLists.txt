@@ -24,9 +24,35 @@ add_executable(ogc
     src/shader.cpp
 )
 
+# external dependency
 add_subdirectory(external/glfw)
-
 add_subdirectory(external/glad)
+
+# testing
+function(testing name src)
+    add_executable(${name} ${src})
+    target_link_libraries(${name} GTest::gtest_main)
+    gtest_discover_tests(${name})
+endfunction()
+
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+# the modules having test will be added in ctest
+enable_testing()
+include(GoogleTest)
+
+# module dependency
+
+# util lib should be added first
+# as it is required by other module
+add_subdirectory(src/util)
 
 target_include_directories(ogc PUBLIC
     external/glad/include
