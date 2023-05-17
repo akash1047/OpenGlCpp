@@ -29,11 +29,6 @@ add_subdirectory(external/glfw)
 add_subdirectory(external/glad)
 
 # testing
-function(testing name src)
-    add_executable(${name} ${src})
-    target_link_libraries(${name} GTest::gtest_main)
-    gtest_discover_tests(${name})
-endfunction()
 
 include(FetchContent)
 FetchContent_Declare(

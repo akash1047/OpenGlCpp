@@ -2,7 +2,7 @@
 #include "../reader.hpp"
 #include <gtest/gtest.h>
 
-TEST(utilStr, read_file) {
+TEST(util_function, read_file) {
     auto file_str = util::read_file(DIR_SRC "/test/shader_example.glsl");
     char shader_src[] = "#version 330 core\n"
                         "layout (location = 0) in vec3 aPos;\n"
