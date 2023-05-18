@@ -8,21 +8,23 @@ project(OpenGLCpp
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(OpenGL REQUIRED)
+configure_file(metadata.h.in metadata.h)
+include_directories(${PROJECT_BINARY_DIR})
 
-# glfw settings
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+find_package(OpenGL REQUIRED)
 
 add_executable(ogc
     src/main.cpp
     src/callback.cpp
     src/shader.cpp
 )
+
+# glfw settings
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 # external dependency
 add_subdirectory(external/glfw)
@@ -49,9 +51,11 @@ include(GoogleTest)
 # as it is required by other module
 add_subdirectory(src/util)
 
+add_subdirectory(src/opengl)
+
 target_include_directories(ogc PUBLIC
     external/glad/include
     external/glfw/include
 )
 
-target_link_libraries(ogc PRIVATE glad glfw OpenGL::GL)
+target_link_libraries(ogc PRIVATE glad glfw OpenGL::GL moduleOpengl moduleUtil)
