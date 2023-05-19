@@ -1,10 +1,8 @@
 #define GLFW_INCLUDE_NONE
 #include "glad/gl.h"
 #include "shader.hpp"
-#include <GLFW/glfw3.h>
+#include "util/glfw.hpp"
 #include <iostream>
-#include "opengl/vertex_shader.hpp"
-#include "opengl/fragment_shader.hpp"
 
 using std::cout;
 using std::endl;
@@ -14,45 +12,26 @@ int main() {
     int height{800};
     char title[] = "OGL";
 
-    GLFWwindow *window{nullptr};
-
     glfwSetErrorCallback([](int code, const char *desc) {
         cout << "GLFW ERROR: " << desc << endl;
     });
 
-    // initialize glfw library
-    if (!glfwInit()) {
-        cout << "Failed to initialize glfw library" << endl;
-        return -1;
-    }
-
-    /* window creation */
-
-    // set window creation hints
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    // create window
-    if (!(window = glfwCreateWindow(width, height, title, nullptr, nullptr))) {
-        cout << "Failed to create window" << endl;
-        glfwTerminate();
-        return -1;
-    }
+    util::glfw glfw{};
+    auto window = glfw.window_builder()
+                      .context_version(3, 3)
+                      .opengl_core()
+                      .set_size(800, 600)
+                      .set_title("opengl-cpp")
+                      .build();
 
     // make opengl context window
-    glfwMakeContextCurrent(window);
+    window.make_context();
 
     // load opengl binding
     // note: window context should be created
     // before calling this function
     if (!gladLoaderLoadGL()) {
         cout << "Failed to load Glad" << endl;
-        glfwTerminate();
         return -1;
     }
 
@@ -153,23 +132,20 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    while (!glfwWindowShouldClose(window)) {
+    while (!window.should_close()) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         shader_program.use();
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        glfwSwapBuffers(window);
+        window.swap_buffers();
         glfwPollEvents();
     }
 
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
-
-    // clean up glfw
-    glfwTerminate();
 
     return 0;
 }
